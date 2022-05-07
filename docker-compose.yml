@@ -1,0 +1,242 @@
+version: '3'
+volumes:
+  db-data: {}
+networks:
+  local:
+    driver: bridge
+services:
+  rabbitmq:
+    image: rabbitmq:3.7.8-management
+    env_file:
+      - .env
+    networks:
+      - local
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    healthcheck:
+      test: rabbitmq-diagnostics ping
+      interval: 1s
+      timeout: 2s
+      retries: 20
+      start_period: 3s
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+      RABBITMQ_DEFAULT_VHOST: local
+  postgres:
+    image: postgres:11
+    env_file:
+      - .env
+    networks:
+      - local
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: pg_isready -U postgres
+      interval: 1s
+      timeout: 2s
+      retries: 20
+      start_period: 3s
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      LC_COLLATE: en_US.UTF8
+      LC_CTYPE: en_US.UTF8
+  pg_migrate_1:
+    image: postgres:11
+    env_file:
+      - .env
+    networks:
+      - local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - /bin/bash
+      - -c
+      - "psql -h postgres -U postgres -c \"CREATE DATABASE test_taskcluster\";
+         if [[ $$? == 0 ]]; then
+           psql -h postgres -U postgres -c \";
+           CREATE USER test PASSWORD 'test';
+           GRANT ALL ON DATABASE test_taskcluster TO test WITH GRANT OPTION;
+           CREATE USER test_auth PASSWORD 'auth_password';
+           CREATE USER test_github PASSWORD 'github_password';
+           CREATE USER test_hooks PASSWORD 'hooks_password';
+           CREATE USER test_index PASSWORD 'index_password';
+           CREATE USER test_notify PASSWORD 'notify_password';
+           CREATE USER test_object PASSWORD 'object_password';
+           CREATE USER test_purge_cache PASSWORD 'purge_cache_password';
+           CREATE USER test_queue PASSWORD 'queue_password';
+           CREATE USER test_secrets PASSWORD 'secrets_password';
+           CREATE USER test_web_server PASSWORD 'web_server_password';
+           CREATE USER test_worker_manager PASSWORD 'worker_manager_password';
+           \";
+         fi;
+         exit 0"
+  pg_migrate_2:
+    image: taskcluster/taskcluster:v44.13.5
+    env_file:
+      - .env
+    networks:
+      - local
+    depends_on:
+      pg_migrate_1:
+        condition: service_completed_successfully
+    command:
+      - script/db:upgrade
+  ui:
+    image: taskcluster/taskcluster:v44.13.5
+    env_file:
+      - .env
+    networks:
+      - local
+    ports:
+      - '9000:9000'
+      - '80:80'
+    command:
+      - ui/web
+  auth-web:
+    image: taskcluster/taskcluster:v44.13.5
+    env_file:
+      - .env
+    networks:
+      - local
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      pg_migrate_2:
+        condition: service_completed_successfully
+    command:
+      - auth/web
+  github-web:
+    image: taskcluster/taskcluster:v44.13.5
+    env_file:
+      - .env
+    networks:
+      - local
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      pg_migrate_2:
+        condition: service_completed_successfully
+    command:
+      - github/web
+  hooks-web:
+    image: taskcluster/taskcluster:v44.13.5
+    env_file:
+      - .env
+    networks:
+      - local
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      pg_migrate_2:
+        condition: service_completed_successfully
+    command:
+      - hooks/web
+  index-web:
+    image: taskcluster/taskcluster:v44.13.5
+    env_file:
+      - .env
+    networks:
+      - local
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      pg_migrate_2:
+        condition: service_completed_successfully
+    command:
+      - index/web
+  notify-web:
+    image: taskcluster/taskcluster:v44.13.5
+    env_file:
+      - .env
+    networks:
+      - local
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      pg_migrate_2:
+        condition: service_completed_successfully
+    command:
+      - notify/web
+  object-web:
+    image: taskcluster/taskcluster:v44.13.5
+    env_file:
+      - .env
+    networks:
+      - local
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      pg_migrate_2:
+        condition: service_completed_successfully
+    command:
+      - object/web
+  purge-cache-web:
+    image: taskcluster/taskcluster:v44.13.5
+    env_file:
+      - .env
+    networks:
+      - local
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      pg_migrate_2:
+        condition: service_completed_successfully
+    command:
+      - purge-cache/web
+  queue-web:
+    image: taskcluster/taskcluster:v44.13.5
+    env_file:
+      - .env
+    networks:
+      - local
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      pg_migrate_2:
+        condition: service_completed_successfully
+    command:
+      - queue/web
+  secrets-web:
+    image: taskcluster/taskcluster:v44.13.5
+    env_file:
+      - .env
+    networks:
+      - local
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      pg_migrate_2:
+        condition: service_completed_successfully
+    command:
+      - secrets/web
+  web-server-web:
+    image: taskcluster/taskcluster:v44.13.5
+    env_file:
+      - .env
+    networks:
+      - local
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      pg_migrate_2:
+        condition: service_completed_successfully
+    ports:
+      - '3050:3050'
+    command:
+      - web-server/web
+  worker-manager-web:
+    image: taskcluster/taskcluster:v44.13.5
+    env_file:
+      - .env
+    networks:
+      - local
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      pg_migrate_2:
+        condition: service_completed_successfully
+    command:
+      - worker-manager/web
