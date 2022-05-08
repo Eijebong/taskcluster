@@ -108,6 +108,22 @@ services:
         condition: service_completed_successfully
     command:
       - auth/web
+    environment:
+      STATIC_CLIENTS: '[
+        {"clientId": "static/taskcluster/built-in-workers", "accessToken": "NDljNDdhNzAtODAyZS00YWI4LWFhMmItYTQ1OWVlNjk5NWU0Cg=="},
+        {"clientId": "static/taskcluster/github", "accessToken": "NDljNDdhNzAtODAyZS00YWI4LWFhMmItYTQ1OWVlNjk5NWU0Cg=="},
+        {"clientId": "static/taskcluster/hooks", "accessToken": "NDljNDdhNzAtODAyZS00YWI4LWFhMmItYTQ1OWVlNjk5NWU0Cg=="},
+        {"clientId": "static/taskcluster/index", "accessToken": "NDljNDdhNzAtODAyZS00YWI4LWFhMmItYTQ1OWVlNjk5NWU0Cg=="},
+        {"clientId": "static/taskcluster/notify", "accessToken": "NDljNDdhNzAtODAyZS00YWI4LWFhMmItYTQ1OWVlNjk5NWU0Cg=="},
+        {"clientId": "static/taskcluster/object", "accessToken": "NDljNDdhNzAtODAyZS00YWI4LWFhMmItYTQ1OWVlNjk5NWU0Cg=="},
+        {"clientId": "static/taskcluster/purge-cache", "accessToken": "NDljNDdhNzAtODAyZS00YWI4LWFhMmItYTQ1OWVlNjk5NWU0Cg=="},
+        {"clientId": "static/taskcluster/queue", "accessToken": "NDljNDdhNzAtODAyZS00YWI4LWFhMmItYTQ1OWVlNjk5NWU0Cg=="},
+        {"clientId": "static/taskcluster/secrets", "accessToken": "NDljNDdhNzAtODAyZS00YWI4LWFhMmItYTQ1OWVlNjk5NWU0Cg=="},
+        {"clientId": "static/taskcluster/web-server", "accessToken": "NDljNDdhNzAtODAyZS00YWI4LWFhMmItYTQ1OWVlNjk5NWU0Cg=="},
+        {"clientId": "static/taskcluster/worker-manager", "accessToken": "NDljNDdhNzAtODAyZS00YWI4LWFhMmItYTQ1OWVlNjk5NWU0Cg=="},
+        {"clientId": "static/taskcluster/root", "accessToken": "NDljNDdhNzAtODAyZS00YWI4LWFhMmItYTQ1OWVlNjk5NWU0Cg=="}
+      ]'
+      DB_CRYPTO_KEYS: '[{"id": "auth", "algo": "aes-256", "key": "DQaZsfU9cQ2Fgxua+wtP547X3ZV30PqG/dHJ0F883dE="}]'
   github-web:
     image: taskcluster/taskcluster:v44.13.5
     env_file:
