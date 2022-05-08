@@ -3,7 +3,6 @@ volumes:
   db-data: {}
 networks:
   local:
-    driver: bridge
 services:
   rabbitmq:
     image: rabbitmq:3.7.8-management
@@ -89,10 +88,11 @@ services:
     env_file:
       - .env
     networks:
-      - local
+      local:
+        aliases:
+          - taskcluster-ui
     ports:
       - '9000:9000'
-      - '80:80'
     command:
       - ui/web
   auth-web:
@@ -100,7 +100,9 @@ services:
     env_file:
       - .env
     networks:
-      - local
+      local:
+        aliases:
+          - auth-web
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -129,7 +131,9 @@ services:
     env_file:
       - .env
     networks:
-      - local
+      local:
+        aliases:
+          - github-web
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -142,7 +146,9 @@ services:
     env_file:
       - .env
     networks:
-      - local
+      local:
+        aliases:
+          - hooks-web
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -155,7 +161,9 @@ services:
     env_file:
       - .env
     networks:
-      - local
+      local:
+        aliases:
+          - index-web
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -168,7 +176,9 @@ services:
     env_file:
       - .env
     networks:
-      - local
+      local:
+        aliases:
+          - notify-web
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -181,7 +191,9 @@ services:
     env_file:
       - .env
     networks:
-      - local
+      local:
+        aliases:
+          - object-web
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -194,7 +206,9 @@ services:
     env_file:
       - .env
     networks:
-      - local
+      local:
+        aliases:
+          - purge-cache-web
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -207,7 +221,9 @@ services:
     env_file:
       - .env
     networks:
-      - local
+      local:
+        aliases:
+          - queue-web
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -220,7 +236,9 @@ services:
     env_file:
       - .env
     networks:
-      - local
+      local:
+        aliases:
+          - secrets-web
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -233,7 +251,9 @@ services:
     env_file:
       - .env
     networks:
-      - local
+      local:
+        aliases:
+          - web-server-web
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -248,7 +268,9 @@ services:
     env_file:
       - .env
     networks:
-      - local
+      local:
+        aliases:
+          - worker-manager-web
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -256,3 +278,14 @@ services:
         condition: service_completed_successfully
     command:
       - worker-manager/web
+  ingress:
+    image: nginx
+    depends_on:
+      - taskcluster-ui
+      - web-server-web
+    networks:
+      - local
+    ports:
+      - '80:80'
+    volumes:
+      - ${PWD}/nginx.conf:/etc/nginx/nginx.conf
