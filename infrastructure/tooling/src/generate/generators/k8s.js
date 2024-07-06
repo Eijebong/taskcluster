@@ -342,6 +342,10 @@ tasks.push({
       type: 'object',
       title: 'Taskcluster Configuration Values',
       properties: {
+        global: {
+            type: 'object',
+            description: 'Unused, this is just to allow using this chart as a subchart',
+        },
         rootUrl: {
           type: 'string',
           format: 'uri',
