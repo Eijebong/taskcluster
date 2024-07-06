@@ -10708,6 +10708,10 @@
           "title": "Configuration options for github",
           "type": "object"
         },
+        "global": {
+          "description": "Unused, this is just to allow using this chart as a subchart",
+          "type": "object"
+        },
         "hooks": {
           "additionalProperties": false,
           "properties": {
