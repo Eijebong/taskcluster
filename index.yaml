@@ -2,6 +2,22 @@ apiVersion: v1
 entries:
   taskcluster:
   - apiVersion: v1
+    appVersion: 68.0.4
+    created: "2024-09-11T12:06:58.100159321Z"
+    description: Framework that supports Mozilla's continuous integration and release
+      processes.
+    digest: 1ebad41967f8291547edf5c1774a4f3c79ad6c0a1db77f3bf6aa84da9bb29047
+    icon: https://media.taskcluster.net/logo/logo.png
+    keywords:
+    - ci
+    - ci-framework
+    name: taskcluster
+    sources:
+    - https://github.com/taskcluster/taskcluster
+    urls:
+    - https://github.com/Eijebong/taskcluster/releases/download/taskcluster-0.2.2/taskcluster-0.2.2.tgz
+    version: 0.2.2
+  - apiVersion: v1
     appVersion: 66.0.0
     created: "2024-07-06T17:28:49.180890093Z"
     description: Framework that supports Mozilla's continuous integration and release
@@ -33,4 +49,4 @@ entries:
     urls:
     - https://github.com/Eijebong/taskcluster/releases/download/taskcluster-0.2.0/taskcluster-0.2.0.tgz
     version: 0.2.0
-generated: "2024-07-06T17:28:49.1809046Z"
+generated: "2024-09-11T12:06:58.100176503Z"
