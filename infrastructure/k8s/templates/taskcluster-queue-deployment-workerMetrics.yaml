@@ -1,3 +1,4 @@
+{{- if not (default false .Values.prometheus.enabled) -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -61,3 +62,4 @@ spec:
             initialDelaySeconds: 432000
             periodSeconds: 60
             failureThreshold: 1
+{{- end }}
