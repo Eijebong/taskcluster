@@ -69,17 +69,14 @@ func (dtf *D2GTaskFeature) Start() *CommandExecutionError {
 
 	var isImageArtifact bool
 	var key string
-	imageArtifactPath := filepath.Join(taskContext.TaskDir, "dockerimage")
-	if _, err := os.Stat(imageArtifactPath); os.IsNotExist(err) {
-		// DockerImageName or NamedDockerImage, no image artifact
-		key = dtf.task.D2GInfo.Image.String()
-	} else {
-		// DockerImageArtifact or IndexedDockerImage
+	var imageArtifactPath string
+
+	if dtf.task.D2GInfo.ImageArtifactSHA256 != "" {
 		isImageArtifact = true
-		key, err = fileutil.CalculateSHA256(imageArtifactPath)
-		if err != nil {
-			return executionError(internalError, errored, fmt.Errorf("[d2g] could not calculate SHA256 of docker image artifact: %v", err))
-		}
+		key = dtf.task.D2GInfo.ImageArtifactSHA256
+		imageArtifactPath = dtf.task.D2GInfo.ImageArtifactPath
+	} else {
+		key = dtf.task.D2GInfo.Image.String()
 	}
 
 	image := dtf.imageCache[key]
@@ -94,6 +91,13 @@ func (dtf *D2GTaskFeature) Start() *CommandExecutionError {
 		var cmd *process.Command
 		var err error
 		if isImageArtifact {
+			taskImagePath := filepath.Join(taskContext.TaskDir, "dockerimage")
+			dtf.task.Infof("[d2g] Copying docker image to %v", taskImagePath)
+			_, err = fileutil.Copy(taskImagePath, imageArtifactPath)
+			if err != nil {
+				return executionError(internalError, errored, fmt.Errorf("[d2g] could not copy docker image: %v", err))
+			}
+
 			cmd, err = process.NewCommandNoOutputStreams([]string{
 				"docker",
 				"load",
