@@ -32,10 +32,13 @@ type (
 		String() string
 	}
 	ConversionInfo struct {
-		ContainerName string
-		CopyArtifacts []CopyArtifact
-		EnvVars       string
-		Image         Image
+		ContainerName       string
+		CopyArtifacts       []CopyArtifact
+		EnvVars             string
+		Image               Image
+		// Those 2 fields are used to store cache information to avoid copying an image if we're not going to docker load it.
+		ImageArtifactPath   string
+		ImageArtifactSHA256 string
 	}
 	CopyArtifact struct {
 		Name     string

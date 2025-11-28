@@ -647,6 +647,29 @@ func (f *FileMount) Mount(taskMount *TaskMount) error {
 	if info, err := os.Stat(file); err == nil && info.IsDir() {
 		return fmt.Errorf("cannot mount file at path %v since it already exists as a directory", file)
 	}
+
+	// Special handling for d2g docker image artifacts
+	// The d2g conversion always uses "dockerimage" as the filename for image artifact mounts
+	// In this case we store the image info and avoid copying the file and let the d2g feature
+	// figure it out
+	if taskMount.task.D2GInfo != nil && f.File == "dockerimage" {
+		cacheFile, err := ensureCached(fsContent, taskMount)
+		if err != nil {
+			return err
+		}
+
+		cacheKey, err := fsContent.UniqueKey(taskMount)
+		if err != nil {
+			return err
+		}
+
+		sha256 := fileCaches[cacheKey].SHA256
+		taskMount.task.D2GInfo.ImageArtifactPath = cacheFile
+		taskMount.task.D2GInfo.ImageArtifactSHA256 = sha256
+		taskMount.Infof("Docker image cached at %v with SHA256 %v", cacheFile, sha256)
+		return nil
+	}
+
 	err = decompress(fsContent, f.Format, file, taskMount)
 	if err != nil {
 		return err
