@@ -17,17 +17,27 @@ spec:
     metadata:
       annotations:
         checksum/secret: '{{ include (print $.Template.BasePath "/taskcluster-index-secret.yaml") . | sha256sum }}'
-      labels: *ref_0
+      labels:
+        app.kubernetes.io/name: taskcluster-index
+        app.kubernetes.io/instance: '{{ .Release.Name }}'
+        app.kubernetes.io/component: taskcluster-index-web
+        app.kubernetes.io/part-of: taskcluster
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9100'
     spec:
       serviceAccountName: taskcluster-index
       imagePullSecrets: {{ if .Values.imagePullSecret }}{{ toJson (list (dict "name" .Values.imagePullSecret)) }}{{ else }}[]{{ end }}
       terminationGracePeriodSeconds: 210
+      securityContext:
+        runAsNonRoot: true
       containers:
         - name: taskcluster-index-web
           image: '{{ .Values.dockerImage }}'
           imagePullPolicy: Always
           args:
             - index/web
+          securityContext:
+            allowPrivilegeEscalation: false
           resources:
             requests:
               cpu: '{{ .Values.index.procs.web.cpu }}'
@@ -48,6 +58,9 @@ spec:
                 name: taskcluster-index
           ports:
             - containerPort: 80
+            - name: prometheus
+              containerPort: 9100
+              protocol: TCP
           readinessProbe:
             httpGet:
               path: /api/index/v1/ping

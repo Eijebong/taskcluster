@@ -1,4 +1,3 @@
-{{- if (default false .Values.prometheus.enabled) -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -9,7 +8,7 @@ metadata:
     app.kubernetes.io/component: taskcluster-queue-workermetrics
     app.kubernetes.io/part-of: taskcluster
 spec:
-  replicas: {{ int (.Values.queue.procs.workerMetrics.replicas) }}
+  replicas: {{ if .Values.prometheus.enabled  }}{{ int (.Values.queue.procs.workerMetrics.replicas) }}{{ else }}0{{end}}
   selector:
     matchLabels: *ref_0
   template:
@@ -27,12 +26,16 @@ spec:
       serviceAccountName: taskcluster-queue
       imagePullSecrets: {{ if .Values.imagePullSecret }}{{ toJson (list (dict "name" .Values.imagePullSecret)) }}{{ else }}[]{{ end }}
       terminationGracePeriodSeconds: 210
+      securityContext:
+        runAsNonRoot: true
       containers:
         - name: taskcluster-queue-workermetrics
           image: '{{ .Values.dockerImage }}'
           imagePullPolicy: Always
           args:
             - queue/workerMetrics
+          securityContext:
+            allowPrivilegeEscalation: false
           resources:
             requests:
               cpu: '{{ .Values.queue.procs.workerMetrics.cpu }}'
@@ -62,4 +65,3 @@ spec:
             initialDelaySeconds: 432000
             periodSeconds: 60
             failureThreshold: 1
-{{- end }}
