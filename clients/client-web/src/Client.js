@@ -1,7 +1,16 @@
 import { withRootUrl } from 'taskcluster-lib-urls';
-import { stringify } from 'query-string';
 import hawk from 'hawk';
 import fetch from './fetch';
+
+const stringify_qs = (obj) => {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      params.append(key, value);
+    }
+  }
+  return params.toString();
+};
 
 export default class Client {
   constructor(options = {}) {
@@ -190,7 +199,7 @@ export default class Client {
       });
     }
 
-    const queryArgs = args[arity] && stringify(args[arity]);
+    const queryArgs = args[arity] && stringify_qs(args[arity]);
     const query = queryArgs ? `?${queryArgs}` : '';
 
     return withRootUrl(this.options.rootUrl).api(
@@ -352,7 +361,7 @@ export default class Client {
     const expectedArity = this.getMethodExpectedArity(entry);
     const endpoint = this.buildEndpoint(entry, args);
     const query = args[expectedArity]
-      ? `?${stringify(args[expectedArity])}`
+      ? `?${stringify_qs(args[expectedArity])}`
       : '';
     const url = withRootUrl(this.options.rootUrl).api(
       this.options.serviceName,
