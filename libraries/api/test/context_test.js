@@ -1,3 +1,4 @@
+import { describe, it, before, after, beforeEach, afterEach } from 'node:test';
 import SchemaSet from '@taskcluster/lib-validate';
 import { App } from '@taskcluster/lib-app';
 import { APIBuilder } from '../src/index.js';
@@ -6,24 +7,26 @@ import request from 'superagent';
 import slugid from 'slugid';
 import sinon from 'sinon';
 import path from 'path';
-import { monitor } from './helper.js';
+import { monitor, setupMonitor, resetMonitorManager } from './helper.js';
 import testing from '@taskcluster/lib-testing';
 
 const __dirname = new URL('.', import.meta.url).pathname;
 
-suite(testing.suiteName(), function() {
+describe(testing.suiteName(), function() {
+  before(setupMonitor);
+  afterEach(resetMonitorManager);
   const rootUrl = 'http://localhost:4321';
 
-  setup(async () => {
+  beforeEach(async () => {
     testing.fakeauth.start({
       'client-with-aa-bb-dd': ['aa', 'bb', 'dd'],
     }, { rootUrl });
   });
-  teardown(() => {
+  afterEach(() => {
     testing.fakeauth.stop();
   });
 
-  test('Provides context', async () => {
+  it('Provides context', async () => {
     // Create test api
     const builder = new APIBuilder({
       title: 'Test Api',
@@ -79,7 +82,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('Context properties can be required', async () => {
+  it('Context properties can be required', async () => {
     // Create test api
     const builder = new APIBuilder({
       title: 'Test Api',
@@ -111,7 +114,7 @@ suite(testing.suiteName(), function() {
     assert(false, 'Expected an error!');
   });
 
-  test('Context properties can provided', async () => {
+  it('Context properties can provided', async () => {
     // Create test api
     const builder = new APIBuilder({
       title: 'Test Api',
@@ -136,7 +139,7 @@ suite(testing.suiteName(), function() {
     });
   });
 
-  test('Context entry should be known', async () => {
+  it('Context entry should be known', async () => {
     //Create test api
     const builder = new APIBuilder({
       title: 'Test Api',
@@ -168,7 +171,7 @@ suite(testing.suiteName(), function() {
     assert(false, 'Expected an error!');
   });
 
-  test('Context entries that take per-request data are updated', async () => {
+  it('Context entries that take per-request data are updated', async () => {
     const builder = new APIBuilder({
       title: 'Test Api',
       description: 'Another test api',

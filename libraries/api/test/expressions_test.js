@@ -1,8 +1,9 @@
+import { describe, it, before, after, beforeEach, afterEach } from 'node:test';
 import assert from 'assert';
 import ScopeExpressionTemplate from '../src/expressions.js';
 import testing from '@taskcluster/lib-testing';
 
-suite(testing.suiteName(), function() {
+describe(testing.suiteName(), function() {
 
   function scenario(expr, params, result, shouldFail = false) {
     return () => {
@@ -37,7 +38,7 @@ suite(testing.suiteName(), function() {
       { bar: ['aaa', 'bbb'], b: 'q' },
       { AllOf: ['aa:aaa:q', 'aa:bbb:q'] }],
   ].forEach(([e, p, r]) => {
-    test(`${JSON.stringify(e)} with ${JSON.stringify(p)} renders correctly`, scenario(e, p, r));
+    it(`${JSON.stringify(e)} with ${JSON.stringify(p)} renders correctly`, scenario(e, p, r));
   });
 
   // These should fail
@@ -50,11 +51,11 @@ suite(testing.suiteName(), function() {
     [{ AllOf: [{ for: 'foo', in: 'bar', each: 'aa:<foo>' }] }, { bar: 'a' }],
     [{ AllOf: [{ for: 'foo', in: 'bar', each: 'aa:<fox>' }] }, { bar: ['a'] }],
   ].forEach(([e, p]) => {
-    test(`${JSON.stringify(e)} with ${JSON.stringify(p)} should fail`, scenario(e, p, null, 'fail!'));
+    it(`${JSON.stringify(e)} with ${JSON.stringify(p)} should fail`, scenario(e, p, null, 'fail!'));
   });
 });
 
-suite('ScopeExpressionTemplate can validate params', () => {
+describe('ScopeExpressionTemplate can validate params', () => {
   [
     {
       expr: { AnyOf: ['abc:<foo>'] },
@@ -89,7 +90,7 @@ suite('ScopeExpressionTemplate can validate params', () => {
       params: { bar: ['a'], baz: '8' },
     },
   ].forEach(({ expr, params }) => {
-    test(`${JSON.stringify(expr)} works with ${JSON.stringify(params)}`, () => {
+    it(`${JSON.stringify(expr)} works with ${JSON.stringify(params)}`, () => {
       const tmpl = new ScopeExpressionTemplate(expr);
       assert(tmpl.validate(params), `Expected ${JSON.stringify(expr)} to validate ${JSON.stringify(params)}`);
     });

@@ -1,12 +1,15 @@
+import { describe, it, before, after, beforeEach, afterEach } from 'node:test';
 import request from 'superagent';
 import assert from 'assert';
 import { APIBuilder } from '../src/index.js';
 import slugid from 'slugid';
-import helper from './helper.js';
+import helper, { setupMonitor, resetMonitorManager } from './helper.js';
 import libUrls from 'taskcluster-lib-urls';
 import testing from '@taskcluster/lib-testing';
 
-suite(testing.suiteName(), function() {
+describe(testing.suiteName(), function() {
+  before(setupMonitor);
+  afterEach(resetMonitorManager);
   const u = path => libUrls.api(helper.rootUrl, 'test', 'v1', path);
 
   // Create test api
@@ -147,7 +150,7 @@ suite(testing.suiteName(), function() {
   });
 
   // Create a mock authentication server
-  setup(async () => {
+  beforeEach(async () => {
     await helper.setupServer({
       builder,
       context: {
@@ -156,9 +159,9 @@ suite(testing.suiteName(), function() {
       },
     });
   });
-  teardown(helper.teardownServer);
+  afterEach(helper.teardownServer);
 
-  test('single parameter', function() {
+  it('single parameter', function() {
     const url = u('/single-param/Hello');
     return request
       .get(url)
@@ -168,7 +171,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('single parameter, trailing slash', function() {
+  it('single parameter, trailing slash', function() {
     const url = u('/single-param/Hello/');
     return request
       .get(url)
@@ -178,7 +181,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('single parameter with slashes', function() {
+  it('single parameter with slashes', function() {
     const url = u('/single-param-with-slashes/Hello/world');
     return request
       .get(url)
@@ -188,7 +191,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('single parameter allowing slashes without slashes', function() {
+  it('single parameter allowing slashes without slashes', function() {
     const url = u('/single-param-with-slashes/Helloworld');
     return request
       .get(url)
@@ -198,7 +201,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('single parameter with encoded slashes', function() {
+  it('single parameter with encoded slashes', function() {
     const url = u('/single-param-with-slashes/Hello%2Fworld');
     return request
       .get(url)
@@ -208,7 +211,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('query parameter', function() {
+  it('query parameter', function() {
     const url = u('/query-param/');
     return request
       .get(url)
@@ -219,7 +222,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('query parameter (is optional)', function() {
+  it('query parameter (is optional)', function() {
     const url = u('/query-param/');
     return request
       .get(url)
@@ -229,7 +232,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('query parameter (validation works)', function() {
+  it('query parameter (validation works)', function() {
     const url = u('/query-param/');
     return request
       .get(url)
@@ -241,7 +244,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('query parameter with function + context (valid)', function() {
+  it('query parameter with function + context (valid)', function() {
     const url = u('/query-param-fn/');
     return request
       .get(url)
@@ -252,7 +255,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('query parameter with function + context (invalid)', function() {
+  it('query parameter with function + context (invalid)', function() {
     const url = u('/query-param-fn/');
     return request
       .get(url)
@@ -264,7 +267,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('slash parameter', function() {
+  it('slash parameter', function() {
     const url = u('/slash-param/Hello/World');
     return request
       .get(url)
@@ -274,7 +277,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('validated reg-exp parameter (valid)', function() {
+  it('validated reg-exp parameter (valid)', function() {
     const id = slugid.v4();
     const url = u('/validated-param/') + id;
     return request
@@ -285,7 +288,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('validated reg-exp parameter (invalid)', function() {
+  it('validated reg-exp parameter (invalid)', function() {
     const url = u('/validated-param/-');
     return request
       .get(url)
@@ -296,7 +299,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('validated function parameter (valid)', function() {
+  it('validated function parameter (valid)', function() {
     const url = u('/validated-param-2/correct');
     return request
       .get(url)
@@ -306,7 +309,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('validated function parameter (invalid)', function() {
+  it('validated function parameter (invalid)', function() {
     const url = u('/validated-param-2/incorrect');
     return request
       .get(url)
@@ -317,7 +320,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('validated function parameter using context (valid)', function() {
+  it('validated function parameter using context (valid)', function() {
     const url = u('/function-validated-param/open-sesame');
     return request
       .get(url)
@@ -327,7 +330,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('validated function parameter using context (invalid)', function() {
+  it('validated function parameter using context (invalid)', function() {
     const url = u('/function-validated-param/open-amaranth');
     return request
       .get(url)
@@ -338,7 +341,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('cors header', function() {
+  it('cors header', function() {
     const url = u('/single-param/Hello');
     return request
       .get(url)
@@ -349,7 +352,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('cache header', function() {
+  it('cache header', function() {
     const url = u('/single-param/Hello');
     return request
       .get(url)
@@ -359,7 +362,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('cache header on 404s', function() {
+  it('cache header on 404s', function() {
     const url = u('/unknown');
     return request
       .get(url)
@@ -369,7 +372,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('reference', async function() {
+  it('reference', async function() {
     const ref = builder.reference();
     ref.entries.forEach(function(entry) {
       if (entry.name === 'testSlashParam') {
@@ -381,7 +384,7 @@ suite(testing.suiteName(), function() {
     });
   });
 
-  test('no duplicate route and method', function() {
+  it('no duplicate route and method', function() {
     builder.declare({
       method: 'get',
       route: '/test',
@@ -405,7 +408,7 @@ suite(testing.suiteName(), function() {
     }, /Identical route and method/);
   });
 
-  test('routes are case-sensitive', function() {
+  it('routes are case-sensitive', function() {
     const url = u('/SiNgLe-pArAm/Hello');
     return request
       .get(url)

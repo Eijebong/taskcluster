@@ -1,8 +1,9 @@
+import { describe, it, before, after, beforeEach, afterEach } from 'node:test';
 import assert from 'assert';
 import { APIBuilder } from '../src/index.js';
 import testing from '@taskcluster/lib-testing';
 
-suite(testing.suiteName(), function() {
+describe(testing.suiteName(), function() {
   // Create test api
   const builder = new APIBuilder({
     title: 'Test Api',
@@ -11,7 +12,7 @@ suite(testing.suiteName(), function() {
     apiVersion: 'v1',
   });
 
-  test('no scopes is OK', function() {
+  it('no scopes is OK', function() {
     // doesn't throw
     builder.declare({
       method: 'get',
@@ -24,7 +25,7 @@ suite(testing.suiteName(), function() {
     }, function(req, res) {});
   });
 
-  test('string scope works', function() {
+  it('string scope works', function() {
     builder.declare({
       method: 'get',
       route: '/testString/:myparam',
@@ -36,7 +37,7 @@ suite(testing.suiteName(), function() {
     }, function(req, res) {});
   });
 
-  test('array of string scope rejected', function() {
+  it('array of string scope rejected', function() {
     assert.throws(function() {
       builder.declare({
         method: 'get',
@@ -50,7 +51,7 @@ suite(testing.suiteName(), function() {
     }, /Invalid scope expression/);
   });
 
-  test('array of arrays of scope rejected', function() {
+  it('array of arrays of scope rejected', function() {
     assert.throws(function() {
       builder.declare({
         method: 'get',
@@ -64,7 +65,7 @@ suite(testing.suiteName(), function() {
     }, /Invalid scope expression/);
   });
 
-  test('scope expression not rejected', function() {
+  it('scope expression not rejected', function() {
     builder.declare({
       method: 'get',
       route: '/testScope/:myparam',
@@ -76,7 +77,7 @@ suite(testing.suiteName(), function() {
     }, function(req, res) {});
   });
 
-  test('scope expression with looping template not rejected', function() {
+  it('scope expression with looping template not rejected', function() {
     builder.declare({
       method: 'get',
       route: '/testScope2/:myparam',

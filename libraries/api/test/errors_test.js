@@ -1,13 +1,16 @@
+import { describe, it, before, after, beforeEach, afterEach } from 'node:test';
 import request from 'superagent';
 import assert from 'assert';
 import { APIBuilder } from '../src/index.js';
-import helper from './helper.js';
+import helper, { setupMonitor, resetMonitorManager } from './helper.js';
 import _ from 'lodash';
 import libUrls from 'taskcluster-lib-urls';
 import { setIsProduction } from '../src/middleware/express-error.js';
 import testing from '@taskcluster/lib-testing';
 
-suite(testing.suiteName(), function() {
+describe(testing.suiteName(), function() {
+  before(setupMonitor);
+  afterEach(resetMonitorManager);
   // Create test api
   const builder = new APIBuilder({
     title: 'Test Api',
@@ -18,14 +21,14 @@ suite(testing.suiteName(), function() {
   });
 
   // Create a mock authentication server
-  setup(async () => {
+  beforeEach(async () => {
     await helper.setupServer({ builder });
   });
-  teardown(helper.teardownServer);
+  afterEach(helper.teardownServer);
 
   // we want to test the production behavior..
-  suiteSetup(function() { setIsProduction(true); });
-  suiteTeardown(function() { setIsProduction(false); });
+  before(function() { setIsProduction(true); });
+  after(function() { setIsProduction(false); });
 
   builder.declare({
     method: 'get',
@@ -39,7 +42,7 @@ suite(testing.suiteName(), function() {
     res.reportError('InputError', 'Testing Error', { dee: 'tails' });
   });
 
-  test('InputError response', async function() {
+  it('InputError response', async function() {
     const url = libUrls.api(helper.rootUrl, 'test', 'v1', '/inputerror');
     return request.get(url).then(res => assert(false, 'should have failed!')).catch(res => {
       if (!res.status) {
@@ -74,7 +77,7 @@ suite(testing.suiteName(), function() {
       { foos: [1, 2, 3] });
   });
 
-  test('TooManyFoos response', async function() {
+  it('TooManyFoos response', async function() {
     const url = libUrls.api(helper.rootUrl, 'test', 'v1', '/toomanyfoos');
     return request.get(url).then(res => assert(false, 'should have failed!')).catch(res => {
       assert(res.status === 472);
@@ -120,7 +123,7 @@ suite(testing.suiteName(), function() {
     throw new Error('uhoh');
   });
 
-  test('ISE response', async function() {
+  it('ISE response', async function() {
     const url = libUrls.api(helper.rootUrl, 'test', 'v1', '/ISE');
     return request.get(url).then(res => assert(false, 'should have failed!')).catch(res => {
       assert(res.status === 500);
@@ -153,7 +156,7 @@ suite(testing.suiteName(), function() {
   }, function(req, res) {
   });
 
-  test('InputValidationError response', async function() {
+  it('InputValidationError response', async function() {
     const url = libUrls.api(helper.rootUrl, 'test', 'v1', '/inputvalidationerror');
     return request.post(url).send({ invalid: 'yep', secret: 's3kr!t' })
       .then(res => assert(false, 'should have failed!'))

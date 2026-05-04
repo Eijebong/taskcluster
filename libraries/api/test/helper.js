@@ -2,18 +2,30 @@ import testing from '@taskcluster/lib-testing';
 import SchemaSet from '@taskcluster/lib-validate';
 import { MonitorManager } from '@taskcluster/lib-monitor';
 import assert from 'assert';
+import net from 'net';
 import path from 'path';
 import { App } from '@taskcluster/lib-app';
 
 const __dirname = new URL('.', import.meta.url).pathname;
 let runningServer = null;
 
-export const rootUrl = 'http://localhost:23525';
+const pickFreePort = () => new Promise((resolve, reject) => {
+  const srv = net.createServer();
+  srv.unref();
+  srv.on('error', reject);
+  srv.listen(0, () => {
+    const { port } = srv.address();
+    srv.close(() => resolve(port));
+  });
+});
+
+const port = await pickFreePort();
+export const rootUrl = `http://localhost:${port}`;
 
 export let monitor = null;
 export let monitorManager = null;
 
-suiteSetup('set up monitorManager', async function() {
+export const setupMonitor = () => {
   monitor = MonitorManager.setup({
     serviceName: 'lib-api',
     fake: true,
@@ -22,15 +34,12 @@ suiteSetup('set up monitorManager', async function() {
     level: 'debug',
   });
   monitorManager = monitor.manager;
-});
+};
 
-teardown(function() {
+export const resetMonitorManager = () => {
   monitorManager.reset();
-});
+};
 
-/**
- * Set up a testing server on port 23525 serving the given API.
- */
 export const setupServer = async ({ builder, context }) => {
   testing.fakeauth.start({
     'client-with-aa-bb-dd': ['aa', 'bb', 'dd'],
@@ -50,7 +59,7 @@ export const setupServer = async ({ builder, context }) => {
   });
 
   runningServer = await App({
-    port: 23525,
+    port,
     env: 'development',
     forceSSL: false,
     trustProxy: false,

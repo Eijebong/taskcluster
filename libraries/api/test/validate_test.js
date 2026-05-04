@@ -1,7 +1,8 @@
+import { describe, it, before, after, beforeEach, afterEach } from 'node:test';
 import request from 'superagent';
 import assert from 'assert';
 import { APIBuilder } from '../src/index.js';
-import helper, { monitor, monitorManager } from './helper.js';
+import helper, { monitor, monitorManager, setupMonitor, resetMonitorManager } from './helper.js';
 import libUrls from 'taskcluster-lib-urls';
 import path from 'path';
 import SchemaSet from '@taskcluster/lib-validate';
@@ -9,15 +10,15 @@ import testing from '@taskcluster/lib-testing';
 
 const __dirname = new URL('.', import.meta.url).pathname;
 
-suite(testing.suiteName(), function() {
+describe(testing.suiteName(), function() {
+  before(setupMonitor);
+  afterEach(resetMonitorManager);
   const u = path => libUrls.api(helper.rootUrl, 'test', 'v1', path);
 
-  setup(async () => {
+  beforeEach(async () => {
     await helper.setupServer({ builder });
   });
-  teardown(() => {
-    helper.teardownServer();
-  });
+  afterEach(helper.teardownServer);
 
   // Create test api
   const builder = new APIBuilder({
@@ -168,7 +169,7 @@ suite(testing.suiteName(), function() {
   });
 
   // Test valid input
-  test('input (valid)', function() {
+  it('input (valid)', function() {
     const url = u('/test-input');
     return request
       .post(url)
@@ -180,7 +181,7 @@ suite(testing.suiteName(), function() {
   });
 
   // Test invalid input
-  test('input (invalid)', function() {
+  it('input (invalid)', function() {
     const url = u('/test-input');
     return request
       .post(url)
@@ -192,7 +193,7 @@ suite(testing.suiteName(), function() {
   });
 
   // Test valid output
-  test('output (valid)', function() {
+  it('output (valid)', function() {
     const url = u('/test-output');
     return request
       .get(url)
@@ -203,7 +204,7 @@ suite(testing.suiteName(), function() {
   });
 
   // test invalid output
-  test('output (invalid)', function() {
+  it('output (invalid)', function() {
     const url = u('/test-invalid-output');
     return request
       .get(url)
@@ -218,7 +219,7 @@ suite(testing.suiteName(), function() {
   });
 
   // test skipping input validation
-  test('skip input validation', function() {
+  it('skip input validation', function() {
     const url = u('/test-skip-input-validation');
     return request
       .post(url)
@@ -230,7 +231,7 @@ suite(testing.suiteName(), function() {
   });
 
   // test skipping output validation
-  test('skip output validation', function() {
+  it('skip output validation', function() {
     const url = u('/test-skip-output-validation');
     return request
       .get(url)
@@ -241,7 +242,7 @@ suite(testing.suiteName(), function() {
   });
 
   // test blob output
-  test('blob output', function() {
+  it('blob output', function() {
     const url = u('/test-blob-output');
     return request
       .get(url)
@@ -251,7 +252,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('input (correct content-type)', function() {
+  it('input (correct content-type)', function() {
     const url = u('/test-input');
     return request
       .post(url)
@@ -262,7 +263,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('input (wrong content-type)', function() {
+  it('input (wrong content-type)', function() {
     const url = u('/test-input');
     return request
       .post(url)
@@ -275,7 +276,7 @@ suite(testing.suiteName(), function() {
   });
 
   // Test res.reply with empty body for get request
-  test('res reply with empty body get request without output schema', function() {
+  it('res reply with empty body get request without output schema', function() {
     const url = u('/test-res-reply');
     return request
       .get(url)
@@ -285,7 +286,7 @@ suite(testing.suiteName(), function() {
   });
 
   // Test res.reply with empty body for post request
-  test('res reply with empty body post request with output schema', function() {
+  it('res reply with empty body post request with output schema', function() {
     const url = u('/test-res-reply-post');
     return request
       .post(url)
@@ -300,7 +301,7 @@ suite(testing.suiteName(), function() {
       });
   });
 
-  test('nonexistent schemas are caught at setup time', async function() {
+  it('nonexistent schemas are caught at setup time', async function() {
     const builder = new APIBuilder({
       title: 'Test Api',
       description: 'Another test api',
@@ -336,13 +337,13 @@ suite(testing.suiteName(), function() {
     assert(0, 'Did not get expected exception');
   });
 
-  test('calling send twice with reportError triggers an Error', async () => {
+  it('calling send twice with reportError triggers an Error', async () => {
     const url = u('/test-double-error-send');
     await assert.doesNotReject(() => request.get(url));
     assert.equal(monitorManager.messages[0].Fields.message, 'API method implementation called res.send twice');
   });
 
-  test('calling send twice with json object triggers an Error', async () => {
+  it('calling send twice with json object triggers an Error', async () => {
     const url = u('/test-double-json-send');
     await assert.rejects(() => request.get(url), /Bad Request/);
     assert.equal(monitorManager.messages[0].Fields.message, 'API method implementation called res.send twice');

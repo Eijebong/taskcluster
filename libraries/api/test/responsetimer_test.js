@@ -1,15 +1,18 @@
+import { describe, it, before, after, beforeEach, afterEach } from 'node:test';
 import request from 'superagent';
 import assert from 'assert';
 import { APIBuilder } from '../src/index.js';
-import helper, { monitorManager } from './helper.js';
+import helper, { monitorManager, setupMonitor, resetMonitorManager } from './helper.js';
 import libUrls from 'taskcluster-lib-urls';
 import testing from '@taskcluster/lib-testing';
 
-suite(testing.suiteName(), function() {
-  setup(async function() {
+describe(testing.suiteName(), function() {
+  before(setupMonitor);
+  afterEach(resetMonitorManager);
+  beforeEach(async function() {
     await helper.setupServer({ builder });
   });
-  teardown(helper.teardownServer);
+  afterEach(helper.teardownServer);
 
   // Create test api
   const builder = new APIBuilder({
@@ -55,7 +58,7 @@ suite(testing.suiteName(), function() {
     res.status(500).send(req.params.name);
   });
 
-  test('single parameter', async function() {
+  it('single parameter', async function() {
     const u = path => libUrls.api(helper.rootUrl, 'test', 'v1', path);
     await request.get(u('/single-param/Hello')),
     await request.get(u('/single-param/Goodbye')),

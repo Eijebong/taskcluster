@@ -1,14 +1,17 @@
+import { describe, it, before, after, beforeEach, afterEach } from 'node:test';
 import request from 'superagent';
 import assert from 'assert';
 import hawk from 'hawk';
 import { APIBuilder } from '../src/index.js';
-import helper, { monitorManager } from './helper.js';
+import helper, { monitorManager, setupMonitor, resetMonitorManager } from './helper.js';
 import _ from 'lodash';
 import libUrls from 'taskcluster-lib-urls';
 import testing from '@taskcluster/lib-testing';
 import { LEVELS } from '@taskcluster/lib-monitor';
 
-suite(testing.suiteName(), function() {
+describe(testing.suiteName(), function() {
+  before(setupMonitor);
+  afterEach(resetMonitorManager);
   // Create test api
   const builder = new APIBuilder({
     title: 'Test Api',
@@ -18,10 +21,10 @@ suite(testing.suiteName(), function() {
   });
 
   // Create a mock authentication server
-  setup(async () => {
+  beforeEach(async () => {
     await helper.setupServer({ builder });
   });
-  teardown(helper.teardownServer);
+  afterEach(helper.teardownServer);
 
   builder.declare({
     method: 'get',
@@ -99,7 +102,7 @@ suite(testing.suiteName(), function() {
     res.reply({});
   });
 
-  test('successful api method is logged', async function() {
+  it('successful api method is logged', async function() {
     const url = libUrls.api(helper.rootUrl, 'test', 'v1', '/require-some-scopes');
     const { header } = hawk.client.header(url, 'GET', {
       credentials: { id: 'client-with-aa-bb-dd', key: 'ignored', algorithm: 'sha256' },
@@ -137,7 +140,7 @@ suite(testing.suiteName(), function() {
     }, 3, 100);
   });
 
-  test('scope-less api method is logged', async function() {
+  it('scope-less api method is logged', async function() {
     const url = libUrls.api(helper.rootUrl, 'test', 'v1', '/require-no-scopes');
     const { header } = hawk.client.header(url, 'GET', {
       credentials: { id: 'client-with-aa-bb-dd', key: 'ignored', algorithm: 'sha256' },
@@ -172,7 +175,7 @@ suite(testing.suiteName(), function() {
     }, 3, 100);
   });
 
-  test('optionally scope-less api method is logged without scopes', async function() {
+  it('optionally scope-less api method is logged without scopes', async function() {
     const url = libUrls.api(helper.rootUrl, 'test', 'v1', '/sometimes-require-no-scopes?private=0');
     const { header } = hawk.client.header(url, 'GET', {
       credentials: { id: 'client-with-aa-bb-dd', key: 'ignored', algorithm: 'sha256' },
@@ -213,7 +216,7 @@ suite(testing.suiteName(), function() {
     }, 3, 100);
   });
 
-  test('optionally scope-less api method is logged with scopes', async function() {
+  it('optionally scope-less api method is logged with scopes', async function() {
     const url = libUrls.api(helper.rootUrl, 'test', 'v1', '/sometimes-require-no-scopes?private=1');
     const { header } = hawk.client.header(url, 'GET', {
       credentials: { id: 'client-with-aa-bb-dd', key: 'ignored', algorithm: 'sha256' },
@@ -248,7 +251,7 @@ suite(testing.suiteName(), function() {
     }, 3, 100);
   });
 
-  test('unauthorized api method is logged', async function() {
+  it('unauthorized api method is logged', async function() {
     const url = libUrls.api(helper.rootUrl, 'test', 'v1', '/require-extra-scopes');
     const { header } = hawk.client.header(url, 'GET', {
       credentials: { id: 'client-with-aa-bb-dd', key: 'ignored', algorithm: 'sha256' },
@@ -287,7 +290,7 @@ suite(testing.suiteName(), function() {
     }, 3, 100);
   });
 
-  test('bewit is elided', async function() {
+  it('bewit is elided', async function() {
     const url = libUrls.api(helper.rootUrl, 'test', 'v1', '/bewitiful?bewit=Y2xpZW50LXdpdGgtYWEtYmItZGRcMTYwMjE3NTYxM1xyVUErZWE1TWxUaWlZR1Vaak5KbE5pTFhnNnhCbXdhRDFxbnozQU1HZ2hJPVw&foo=abc');
     await request.get(url);
 
@@ -320,7 +323,7 @@ suite(testing.suiteName(), function() {
     }, 3, 100);
   });
 
-  test('unknown query params are not logged', async function() {
+  it('unknown query params are not logged', async function() {
     const url = libUrls.api(helper.rootUrl, 'test', 'v1', '/bewitiful?bar=abc');
     const { header } = hawk.client.header(url, 'GET', {
       credentials: { id: 'client-with-aa-bb-dd', key: 'ignored', algorithm: 'sha256' },
@@ -359,7 +362,7 @@ suite(testing.suiteName(), function() {
     }, 3, 100);
   });
 
-  test('invalid query params are not logged', async function() {
+  it('invalid query params are not logged', async function() {
     const url = libUrls.api(helper.rootUrl, 'test', 'v1', '/bewitiful?foo=def');
     const { header } = hawk.client.header(url, 'GET', {
       credentials: { id: 'client-with-aa-bb-dd', key: 'ignored', algorithm: 'sha256' },

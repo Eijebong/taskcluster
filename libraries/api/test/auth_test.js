@@ -1,3 +1,4 @@
+import { describe, it, before, after, beforeEach, afterEach } from 'node:test';
 import _ from 'lodash';
 import request from 'superagent';
 import hawk from 'hawk';
@@ -5,7 +6,7 @@ import assert from 'assert';
 import SchemaSet from '@taskcluster/lib-validate';
 import { App } from '@taskcluster/lib-app';
 import { APIBuilder } from '../src/index.js';
-import { monitor } from './helper.js';
+import { monitor, setupMonitor, resetMonitorManager } from './helper.js';
 import testing from '@taskcluster/lib-testing';
 import path from 'path';
 import debugFactory from 'debug';
@@ -13,14 +14,15 @@ const debug = debugFactory('auth_test');
 
 const __dirname = new URL('.', import.meta.url).pathname;
 
-suite(testing.suiteName(), function() {
+describe(testing.suiteName(), { timeout: 1500 }, function() {
+  before(setupMonitor);
+  afterEach(resetMonitorManager);
   // Reference for test api server
   let _apiServer = null;
   let nockScope = null;
   let authenticated = false;
   let traceId = null;
 
-  this.timeout(1500);
 
   // Create test api
   const builder = new APIBuilder({
@@ -31,7 +33,7 @@ suite(testing.suiteName(), function() {
   });
 
   // Create a mock authentication server
-  setup(async () => {
+  beforeEach(async () => {
     const rootUrl = 'http://localhost:4321/';
     nockScope = testing.fakeauth.start({
       'test-client': ['service:magic'],
@@ -67,7 +69,7 @@ suite(testing.suiteName(), function() {
   });
 
   // Close server
-  teardown(async () => {
+  afterEach(async () => {
     testing.fakeauth.stop();
     nockScope = null;
     if (authenticated) {
@@ -108,7 +110,7 @@ suite(testing.suiteName(), function() {
     tests.forEach(({ label, id, desiredStatus = 200, params, tester, shouldCallAuth = true }) => {
       const url = buildUrl(params);
       const auth = buildHawk(id);
-      test(label, async () => {
+      it(label, async () => {
         for (let key of Object.keys(sideEffects)) {
           delete sideEffects[key];
         }
