@@ -339,12 +339,10 @@ export default class ViewWorker extends Component {
               title="Quarantine?"
               body={
                 <Fragment>
-                  <Fragment>
-                    Quarantining a worker allows the machine to remain alive but
-                    not accept jobs. Note that a quarantine can be lifted by
-                    setting &quot;Quarantine Until&quot; to the present time or
-                    somewhere in the past.
-                  </Fragment>
+                  Quarantining a worker allows the machine to remain alive but
+                  not accept jobs. Note that a quarantine can be lifted by
+                  setting &quot;Quarantine Until&quot; to the present time or
+                  somewhere in the past.
                   <br />
                   <br />
                   <TextField
@@ -437,12 +435,10 @@ export default class ViewWorker extends Component {
 
     return (
       <Dashboard title="Worker">
-        <Fragment>
-          {loading && <Spinner loading />}
-          <ErrorPanel fixed error={graphqlError} />
-          {worker && this.renderQueueWorker()}
-          {!worker && WorkerManagerWorker && this.renderWorkerManagerWorker()}
-        </Fragment>
+        {loading && <Spinner loading />}
+        <ErrorPanel fixed error={graphqlError} />
+        {worker && this.renderQueueWorker()}
+        {!worker && WorkerManagerWorker && this.renderWorkerManagerWorker()}
       </Dashboard>
     );
   }

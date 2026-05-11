@@ -350,53 +350,51 @@ export default class ViewClient extends Component {
           </Card>
         </Collapse>
         {!isCliLogin || user ? (
-          <Fragment>
-            {isNewClient ? (
-              <Fragment>
-                <ErrorPanel fixed error={error} />
+          isNewClient ? (
+            <Fragment>
+              <ErrorPanel fixed error={error} />
+              <ClientForm
+                key={this.getClientFormKey(initialClient)}
+                loading={loading}
+                client={initialClient}
+                isNewClient
+                onSaveClient={this.handleSaveClient}
+              />
+            </Fragment>
+          ) : (
+            <Fragment>
+              {(clientData?.loading || currentScopesData?.loading) && (
+                <Spinner loading />
+              )}
+              <ErrorPanel
+                fixed
+                warning={isClientDisabled}
+                error={
+                  (isClientDisabled && 'Disabled') ||
+                  error ||
+                  clientData?.error ||
+                  currentScopesData?.error
+                }
+              />
+              {clientData?.client && (
                 <ClientForm
-                  key={this.getClientFormKey(initialClient)}
+                  dialogError={dialogError}
                   loading={loading}
-                  client={initialClient}
-                  isNewClient
+                  client={clientData.client}
+                  onResetAccessToken={this.handleResetAccessToken}
                   onSaveClient={this.handleSaveClient}
+                  onDeleteClient={this.handleDeleteClient}
+                  onDisableClient={this.handleDisableClient}
+                  onEnableClient={this.handleEnableClient}
+                  dialogOpen={dialogOpen}
+                  onDialogActionError={this.handleDialogActionError}
+                  onDialogActionComplete={this.handleDialogActionComplete}
+                  onDialogActionClose={this.handleDialogActionClose}
+                  onDialogActionOpen={this.handleDialogActionOpen}
                 />
-              </Fragment>
-            ) : (
-              <Fragment>
-                {(clientData?.loading || currentScopesData?.loading) && (
-                  <Spinner loading />
-                )}
-                <ErrorPanel
-                  fixed
-                  warning={isClientDisabled}
-                  error={
-                    (isClientDisabled && 'Disabled') ||
-                    error ||
-                    clientData?.error ||
-                    currentScopesData?.error
-                  }
-                />
-                {clientData?.client && (
-                  <ClientForm
-                    dialogError={dialogError}
-                    loading={loading}
-                    client={clientData.client}
-                    onResetAccessToken={this.handleResetAccessToken}
-                    onSaveClient={this.handleSaveClient}
-                    onDeleteClient={this.handleDeleteClient}
-                    onDisableClient={this.handleDisableClient}
-                    onEnableClient={this.handleEnableClient}
-                    dialogOpen={dialogOpen}
-                    onDialogActionError={this.handleDialogActionError}
-                    onDialogActionComplete={this.handleDialogActionComplete}
-                    onDialogActionClose={this.handleDialogActionClose}
-                    onDialogActionOpen={this.handleDialogActionOpen}
-                  />
-                )}
-              </Fragment>
-            )}
-          </Fragment>
+              )}
+            </Fragment>
+          )
         ) : (
           <SignInDialog open />
         )}
