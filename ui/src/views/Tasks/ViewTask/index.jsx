@@ -162,8 +162,7 @@ export default class ViewTask extends Component {
         // if an action with this name has already been selected,
         // don't consider this version
         if (
-          task &&
-          task.tags &&
+          task?.tags &&
           taskInContext(action.context, task.tags) &&
           !taskActions.some(({ name }) => name === action.name)
         ) {
@@ -909,7 +908,7 @@ export default class ViewTask extends Component {
             defaultValue={match.params.taskId}
           />
         }>
-        <Helmet state={task && task.status.state} />
+        <Helmet state={task?.status.state} />
         {loading && (
           <Fragment>
             <Spinner loading />
@@ -1079,8 +1078,7 @@ export default class ViewTask extends Component {
                 tooltipTitle="Profile Task Log"
                 onClick={this.handleOpenLogProfiler}
               />
-              {taskActions &&
-                taskActions.length &&
+              {taskActions?.length &&
                 taskActions.map(action => (
                   <SpeedDialAction
                     requiresAuth
