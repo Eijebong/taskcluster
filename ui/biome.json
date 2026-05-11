@@ -1,7 +1,7 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
   "files": {
-    "includes": ["**/*.js", "**/*.jsx"]
+    "includes": ["**/*.js", "**/*.jsx", "!**/test/e2e/**"]
   },
   "formatter": {
     "enabled": true,
@@ -10,6 +10,7 @@
     "lineWidth": 80
   },
   "javascript": {
+    "jsxRuntime": "reactClassic",
     "formatter": {
       "quoteStyle": "single",
       "jsxQuoteStyle": "double",
@@ -26,6 +27,12 @@
     }
   },
   "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  },
+  "assist": {
     "enabled": false
   }
 }
