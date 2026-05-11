@@ -133,9 +133,7 @@ export default class HooksListTable extends Component {
                 )}
               </TableCellItem>
             </Link>
-          ) : (
-            undefined
-          )}
+          ) : undefined}
           {bindings?.length ? (
             <Link to={hookUrl}>
               <TableCellItem>
@@ -161,9 +159,7 @@ export default class HooksListTable extends Component {
                 )}
               </TableCellItem>
             </Link>
-          ) : (
-            undefined
-          )}
+          ) : undefined}
           {!schedule?.length && !bindings?.length && <em>n/a</em>}
         </TableCell>
 
@@ -177,21 +173,15 @@ export default class HooksListTable extends Component {
                 </span>
               </TableCellItem>
             </Link>
-          ) : (
-            undefined
-          )}
+          ) : undefined}
           {error ? (
             <Link to={hookUrl}>
               <pre>{error}</pre>
             </Link>
-          ) : (
-            undefined
-          )}
+          ) : undefined}
           {!lastFire?.taskId && !error && lastFire?.result ? (
             <span>{lastFire.result}</span>
-          ) : (
-            undefined
-          )}
+          ) : undefined}
         </TableCell>
 
         <CopyToClipboardTableCell
@@ -200,9 +190,7 @@ export default class HooksListTable extends Component {
           text={
             lastFire?.taskCreateTime ? (
               <DateDistance from={lastFire.taskCreateTime} />
-            ) : (
-              undefined
-            )
+            ) : undefined
           }
         />
       </TableRow>
