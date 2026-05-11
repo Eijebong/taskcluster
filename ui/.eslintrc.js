@@ -39,17 +39,6 @@ module.exports = {
     'no-console': 'error',
     'no-extra-parens': 'off',
     'prefer-const': 'error',
-    'prettier/prettier': [
-      'error',
-      {
-        singleQuote: true,
-        trailingComma: 'es5',
-        bracketSpacing: true,
-        jsxBracketSameLine: true,
-        tabWidth: 2,
-        semi: true
-      }
-    ],
     'padding-line-between-statements': [
       'error',
       {
@@ -125,6 +114,6 @@ module.exports = {
     sourceType: 'module',
     ecmaFeatures: { legacyDecorators: true }
   },
-  plugins: [ 'babel', 'react', 'react-hooks', 'prettier', 'react-hooks' ],
+  plugins: [ 'babel', 'react', 'react-hooks' ],
   settings: { react: { version: 'detect' } }
 }
