@@ -1,6 +1,7 @@
-import { algo, enc } from 'crypto-js';
-import { v4 } from './utils';
-import Auth from './clients/Auth';
+import cryptoJs from 'crypto-js';
+const { algo, enc } = cryptoJs;
+import { v4 } from './utils.js';
+import Auth from './clients/Auth.js';
 
 const createHmac = (...args) => algo.HMAC.create(...args);
 const sha256 = algo.SHA256;
